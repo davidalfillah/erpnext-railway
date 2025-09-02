@@ -1,8 +1,20 @@
-# Use the official ERPNext Docker image as the base
-FROM frappe/erpnext:v15.40.0
+FROM frappe/erpnext:v14.35.2
 
-# Expose the port ERPNext runs on
+# Switch to frappe user
+USER frappe
+
+# Set work directory
+WORKDIR /home/frappe/frappe-bench
+
+# Copy custom configurations if any
+COPY --chown=frappe:frappe . /home/frappe/frappe-bench/
+
+# Expose port
 EXPOSE 8000
 
-# Set the entrypoint to run ERPNext
-CMD ["bench", "start"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=120s --retries=3 \
+  CMD curl -f http://localhost:8000 || exit 1
+
+# Start command
+CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
