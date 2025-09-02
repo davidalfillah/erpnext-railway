@@ -1,0 +1,37 @@
+version: '3'
+services:
+  erpnext:
+    image: frappe/erpnext:v15.40.0
+    deploy:
+      restart_policy:
+        condition: on-failure
+    environment:
+      - DB_HOST=mariadb
+      - DB_PORT=3306
+      - DB_NAME=erpnext
+      - DB_PASSWORD=${MARIADB_PASSWORD}
+      - DB_USER=${MARIADB_USER}
+      - SITE_NAME=erpnext.localhost
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - INSTALL_APPS=erpnext
+    ports:
+      - "8000:8000"
+    volumes:
+      - erpnext-data:/home/frappe/frappe-bench/sites
+    depends_on:
+      - mariadb
+  mariadb:
+    image: mariadb:10.6
+    deploy:
+      restart_policy:
+        condition: on-failure
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=erpnext
+      - MYSQL_USER=${MARIADB_USER}
+      - MYSQL_PASSWORD=${MARIADB_PASSWORD}
+    volumes:
+      - mariadb-data:/var/lib/mysql
+volumes:
+  erpnext-data:
+  mariadb-data:
